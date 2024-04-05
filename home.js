@@ -22,6 +22,63 @@ console.log(username);
 const nameToDisplay = document.getElementById("name");
 nameToDisplay.textContent = username;
 
+
+
+function show(tasks){
+    const tablerow = document.getElementById("tablerow");
+    tablerow.innerHTML = "";
+    tasks.forEach(task => {
+        const row = document.createElement('tr');
+        row.id = `row_${task.taskId}`;
+        row.innerHTML = `
+                    <td>${task.dateForSchedule}</td>
+                    <td>${task.taskName}</td>
+                    <td>${task.priority}</td>
+                    <td>${task.startTime}</td>
+                    <td>${task.endTime}</td>
+                    <td>
+                        <button class="oxd-icon-button oxd-table-cell-action-space" type="button" onclick="editTask('${task.taskId}')">
+                            <i class="oxd-icon bi-pencil" data-v-bddebfba=""></i>
+                        </button>
+                        <button class="oxd-icon-button oxd-table-cell-action-space" type="button" onclick="deleteTask('${task.taskId}')">
+                            <i class="oxd-icon bi-trash" data-v-bddebfba=""></i>
+                        </button>
+                    </td>
+                `;
+        tablerow.appendChild(row);
+    });
+}
+
+
+function shows(tasks){
+    const trow = document.getElementById("trow");
+    trow.innerHTML = "";
+    tasks.forEach(task => {
+        const row = document.createElement('tr');
+        row.id = `row_${task.taskId}`;
+        row.innerHTML = `
+                <td>${task.dateForSchedule}</td>
+                <td>${task.taskName}</td>
+                <td>${task.priority}</td>
+                <td>${task.startTime}</td>
+                <td>${task.endTime}</td>
+                <td>
+                    <button class="oxd-icon-button oxd-table-cell-action-space" type="button" onclick="editTask('${task.taskId}')">
+                        <i class="oxd-icon bi-pencil" data-v-bddebfba=""></i>
+                    </button>
+                    <button class="oxd-icon-button oxd-table-cell-action-space" type="button" onclick="deleteTask('${task.taskId}')">
+                        <i class="oxd-icon bi-trash" data-v-bddebfba=""></i>
+                    </button>
+                </td>
+            `;
+        trow.appendChild(row);
+    });
+}
+
+function resetTask(){
+    const date = new Date().toISOString().split('T')[0];
+    fetchTasks(`http://localhost:8081/task/date/${date}`);
+}
 //add a task   
 var fetchResult;
 document.getElementById("task-form").addEventListener("submit", function (event) {
@@ -160,32 +217,13 @@ async function fetchTasks(apiUrl) {
     }
 
     const tasks = await response.json();
-    console.log(tasks)
+    // console.log(tasks)
     const tablerow = document.getElementById("tablerow");
     tablerow.innerHTML = "";
     if (tasks.length === 0) {
         document.getElementById("tablerow").textContent = "No tasks scheduled for today.";
     } else {
-        tasks.forEach(task => {
-            const row = document.createElement('tr');
-            row.id = `row_${task.taskId}`;
-            row.innerHTML = `
-                        <td>${task.dateForSchedule}</td>
-                        <td>${task.taskName}</td>
-                        <td>${task.priority}</td>
-                        <td>${task.startTime}</td>
-                        <td>${task.endTime}</td>
-                        <td>
-                            <button class="oxd-icon-button oxd-table-cell-action-space" type="button" onclick="editTask('${task.taskId}')">
-                                <i class="oxd-icon bi-pencil" data-v-bddebfba=""></i>
-                            </button>
-                            <button class="oxd-icon-button oxd-table-cell-action-space" type="button" onclick="deleteTask('${task.taskId}')">
-                                <i class="oxd-icon bi-trash" data-v-bddebfba=""></i>
-                            </button>
-                        </td>
-                    `;
-            tablerow.appendChild(row);
-        });
+        show(tasks)
     }
 }
 
@@ -202,32 +240,13 @@ async function viewfetchTask() {
     }
 
     const tasks = await response.json();
-    console.log(tasks)
+    // console.log(tasks)
     const trow = document.getElementById("trow");
     trow.innerHTML = "";
     if (tasks.length === 0) {
         document.getElementById("trow").textContent = 'No tasks found.';
     } else {
-        tasks.forEach(task => {
-            const row = document.createElement('tr');
-            row.id = `row_${task.taskId}`;
-            row.innerHTML = `
-                    <td>${task.dateForSchedule}</td>
-                    <td>${task.taskName}</td>
-                    <td>${task.priority}</td>
-                    <td>${task.startTime}</td>
-                    <td>${task.endTime}</td>
-                    <td>
-                        <button class="oxd-icon-button oxd-table-cell-action-space" type="button" onclick="editTask('${task.taskId}')">
-                            <i class="oxd-icon bi-pencil" data-v-bddebfba=""></i>
-                        </button>
-                        <button class="oxd-icon-button oxd-table-cell-action-space" type="button" onclick="deleteTask('${task.taskId}')">
-                            <i class="oxd-icon bi-trash" data-v-bddebfba=""></i>
-                        </button>
-                    </td>
-                `;
-            trow.appendChild(row);
-        });
+        shows(tasks)
     }
 }
 
@@ -277,4 +296,66 @@ async function deleteTask(taskId) {
     }
 }
 
+
+
+
+
+
+
+
+
+
+
+// Function to fetch tasks sorted by task name
+async function fetchTasksSorted(order) {
+    const token = localStorage.getItem('token');
+    const date = new Date().toISOString().split('T')[0];
+    let apiUrl; // Define apiUrl variable here
+
+    if (order === 'asc') {
+        apiUrl = `http://localhost:8081/task/date/asc/${date}`;
+    } else {
+        apiUrl = `http://localhost:8081/task/date/desc/${date}`;
+    }
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch tasks');
+        }
+
+        const tasks = await response.json();
+        show(tasks)
+    } catch (error) {
+        console.error('Error fetching sorted tasks:', error);
+        alert('Error fetching sorted tasks. Please try again later.');
+    }
+}
+
+
+// Event listener for ascending sort icon
+document.querySelector('.bi-sort-alpha-up').addEventListener('click', async function () {
+    try {
+        await fetchTasksSorted('asc');
+    } catch (error) {
+        console.error('Error fetching sorted tasks:', error);
+        alert('Error fetching sorted tasks. Please try again later.');
+    }
+});
+
+// Event listener for descending sort icon
+document.querySelector('.bi-sort-alpha-down').addEventListener('click', async function () {
+    try {
+        await fetchTasksSorted('desc');
+    } catch (error) {
+        console.error('Error fetching sorted tasks:', error);
+        alert('Error fetching sorted tasks. Please try again later.');
+    }
+});
 

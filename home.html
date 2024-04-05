@@ -63,10 +63,12 @@
                                 <thead>
                                     <tr>
                                         <th scope="col">Date</th>
-                                        <th scope="col">Task Name</th>
+                                        <th scope="col">Task Name<b class="bi bi-sort-alpha-up"></b> <!-- Ascending order -->
+                                            <b class="bi bi-sort-alpha-down"></b></th>
                                         <th scope="col">Priority</th>
                                         <th scope="col">Starting Time</th>
                                         <th scope="col">Ending Time</th>
+                                        <button onclick="resetTask()">Reset</button>
                                     </tr>
                                 </thead>
                                 <tbody id="tablerow">
